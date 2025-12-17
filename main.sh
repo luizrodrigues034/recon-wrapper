@@ -1,7 +1,14 @@
+
 default_scan(){
-        mkdir ~/$1 && sudo nmap -sS $1 -oX ~/$1/default_scan.xml && cat ~/$1/default_scan.xml
-        return 0;
+	if [ ! -d ~/$1 ]
+	then
+        	mkdir ~/$1
+	fi
+	sudo nmap -sS -p- $1 -oX ~/$1/default_scan.xml &&  grep "open" ~/192.168.59.131/default_scan.xml \
+| sed -E 's/.*portid="([0-9]+)".*name="([a-zA-Z0-9-]+)".*/\1=\2/' > ~/$1/open_ports.txt
+	return 0;
 }
+
 
 while [ -n "$1" ]
 do
@@ -16,7 +23,7 @@ do
                                 exit 1
                         fi
                         default_scan "$2"
-                        shift
+			shift
                         shift
                         ;;
                 *)
