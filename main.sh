@@ -1,14 +1,22 @@
-
+#!/bin/env  bash
 default_scan(){
-	if [ ! -d ~/$1 ]
+	if [ ! -d ./workspaces/$1 ]
 	then
-        	mkdir ~/$1
+        	mkdir -p ./workspaces/$1
 	fi
-	sudo nmap -sS -p- $1 -oX ~/$1/default_scan.xml &&  grep "open" ~/192.168.59.131/default_scan.xml \
-| sed -E 's/.*portid="([0-9]+)".*name="([a-zA-Z0-9-]+)".*/\1=\2/' > ~/$1/open_ports.txt
+	workdir="./workspaces/$1"
+	sudo nmap -sS "$1" -oX "$workdir/default_scan.xml" >/dev/null && xmlstarlet sel -t -m "//port[state/@state='open']" -v "@portid" -o "=" -v "service/@name" -n "$workdir/default_scan.xml" > "$workdir/open_ports.txt"
 	return 0;
 }
 
+ftp_enum(){
+	echo "Teste ftp $1"
+	if [ -f modules/ftp.sh ]
+	then
+		echo Ok
+		./modules/ftp.sh $1 21
+	fi
+}
 
 while [ -n "$1" ]
 do
@@ -22,7 +30,9 @@ do
                                 echo "Nao passou Ip"
                                 exit 1
                         fi
-                        default_scan "$2"
+			target=$2
+                        default_scan "$target"
+			ftp_enum "$target"
 			shift
                         shift
                         ;;
