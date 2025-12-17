@@ -2,11 +2,28 @@
 default_scan(){
 	if [ ! -d ./workspaces/$1 ]
 	then
-        	mkdir -p ./workspaces/$1
+        	mkdir -p ./workspaces/$1/init_scan
 	fi
-	workdir="./workspaces/$1"
-	sudo nmap -sS "$1" -oX "$workdir/default_scan.xml" >/dev/null && xmlstarlet sel -t -m "//port[state/@state='open']" -v "@portid" -o "=" -v "service/@name" -n "$workdir/default_scan.xml" > "$workdir/open_ports.txt"
-	return 0;
+	workdir="./workspaces/$1/init_scan"
+	sudo nmap -sS "$1" -oX "$workdir/default_scan.xml" >/dev/null && \
+xmlstarlet sel -t -m "//port[state/@state='open']" -v "@portid" -o "=" -v "service/@name" -n "$workdir/default_scan.xml" > "$workdir/open_ports.txt" 
+	return 0
+}
+
+scan_by_service(){
+	echo "Dentro Metodo"
+	for line in  $(cat "$workdir/open_ports.txt")
+        do
+		
+		port=$(echo "$line" | cut -d"=" -f1)
+       		service_name=$(echo "$line" | cut -d"=" -f2)
+		echo "Trabalhando com o host: $target na porta $port hospendando o servico $service_name"
+		case "$service_name" in
+			*ftp*)
+				ftp_enum "$target" "$port"
+		esac
+	done
+        return 0
 }
 
 ftp_enum(){
@@ -32,7 +49,7 @@ do
                         fi
 			target=$2
                         default_scan "$target"
-			ftp_enum "$target"
+			scan_by_service 
 			shift
                         shift
                         ;;

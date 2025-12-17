@@ -13,7 +13,7 @@ banner_grabling(){
 		return 1
 	else
 		echo "Salvando"
-		echo "$banner" >> $workdir/ftp_service/info_ftp.txt
+		echo "$banner" >> $workdir/ftp_service/banner_ftp.txt
 		return 0
 	fi
 }
