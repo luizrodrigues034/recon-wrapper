@@ -1,11 +1,14 @@
 #!/bin/env  bash
+[ "$EUID" -ne 0 ] && echo "Execute como root" && exit 1
+set -euo pipefail
+
+
 default_scan(){
-	if [ ! -d ./workspaces/$1 ]
-	then
-        	mkdir -p ./workspaces/$1/init_scan
-	fi
+
+        mkdir -p ./workspaces/$1/init_scan
+
 	workdir="./workspaces/$1/init_scan"
-	sudo nmap -sS "$1" -oX "$workdir/default_scan.xml" >/dev/null && \
+	nmap -sS "$1" -oX "$workdir/default_scan.xml" >/dev/null && \
 xmlstarlet sel -t -m "//port[state/@state='open']" -v "@portid" -o "=" -v "service/@name" -n "$workdir/default_scan.xml" > "$workdir/open_ports.txt" 
 	return 0
 }
@@ -27,15 +30,14 @@ scan_by_service(){
 }
 
 ftp_enum(){
-	echo "Teste ftp $1"
 	if [ -f modules/ftp.sh ]
 	then
 		echo Ok
-		./modules/ftp.sh $1 21
+		./modules/ftp.sh $1 $2 
 	fi
 }
 
-while [ -n "$1" ]
+while [ "$#" -gt 0 ]
 do
         case "$1" in
                 --help | -h)
@@ -50,8 +52,7 @@ do
 			target=$2
                         default_scan "$target"
 			scan_by_service 
-			shift
-                        shift
+			shift 2
                         ;;
                 *)
                         echo "Opção $1 é invalida"

@@ -3,24 +3,39 @@ port=$2
 workdir=workspaces/$1
 
 banner_grabling(){
-	echo "Metodo Chamado"
-	banner=$(timeout 5 nc -vn "$1" "$2" 2>/dev/null || \
-	echo "QUIT" | timeout 10 openssl s_client -connect "$1:$2" -starttls ftp -quiet 2>/dev/null)
-	echo "consultou"
+	echo "[*] Coletando banner"
+	local banner=$(timeout 5 nc -vn "$target" "$port" 2>/dev/null || \
+	echo "QUIT" | timeout 10 openssl s_client -connect "$target:$port" -starttls ftp -quiet 2>/dev/null)
+	echo "[*] Termino da Coleta"
 	if [ -z "$banner" ]
 	then
-		echo "Nenhum Banner encontrado"
+		echo "[*] Nao houve Resposta"
 		return 1
 	else
-		echo "Salvando"
+		echo "[*] Banner encontrado"
+		echo "[*] Salvando Banner"
 		echo "$banner" >> $workdir/ftp_service/banner_ftp.txt
 		return 0
 	fi
 }
 
-if [ ! -d $workdir/ftp_service ]
-then
-	mkdir $workdir/ftp_service
-fi
+nmap_ftp(){
+	nmap -sV -p "$port" -sC -A "$target" -oX $workdir/ftp_service/nmap_ftp.xml > /dev/null
+	xml_file="$workdir/ftp_service/nmap_ftp.xml"
 
-banner_grabling $1 $2
+	if grep -q "Anonymous FTP login allowed" "$xml_file"
+	then
+		echo "[*]Chama metodo de download recursivo"
+		echo "[*]Metodo de listagem de diretorios caso nao for possivel"
+		return 0
+	fi
+	echo "[*] Login Anonimo nao e permitido"
+	return 1
+}
+
+mkdir -p "$workdir/ftp_service"
+
+
+banner_grabling &
+nmap_ftp &
+wait 
