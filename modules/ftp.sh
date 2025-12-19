@@ -1,15 +1,17 @@
-target=$1
-port=$2
-service_name=$3
-workdir=workspaces/$1
+#!/bin/env bash
+WORKDIR=workspaces/$1
 
 nmap_ftp(){
-	nmap -sV -p "$port" -sC -A "$target" -oX "$workdir/$service_name/nmap_ftp.xml"> /dev/null
-	xml_file="$workdir/$service_name/nmap_ftp.xml"
+	local target="$1"
+	local port="$2"
+	local service_name="$3"
+
+	nmap -sV -p "$port" -sC -A "$target" -oX "$WORKDIR/$service_name/nmap_ftp.xml"> /dev/null
+	local xml_file="$WORKDIR/$service_name/nmap_ftp.xml"
 
 	if grep -q "Anonymous FTP login allowed" "$xml_file"
 	then
-		recursive_extract || echo "[!] Nmap detectou Anonymous, mas a validação falhou."
+		recursive_extract "$target" "$port" "$service_name"  || echo "[!] Nmap detectou Anonymous, mas a validação falhou."
 		return 0
 	fi
 	echo "[*] Login Anonimo nao e permitido"
@@ -17,22 +19,30 @@ nmap_ftp(){
 }
 
 recursive_extract(){
-        wget -m -nH --no-parent -P "$workdir/$service_name/ftp_loot/" "ftp://$target/" 2>/dev/null
+	local target="$1"
+        local port="$2"
+        local service_name="$3"
+
+        wget -m -nH --no-parent -P "$WORKDIR/$service_name/ftp_loot/" "ftp://$target/" 2>/dev/null
 	if [ $? -eq 0 ]
 	then
-		echo "[*]Ftp loot disponivel em $workdir/$service_name/ftp_loot"
+		echo "[*]Ftp loot disponivel em $WORKDIR/$service_name/ftp_loot"
 		return 0
 	elif curl -s --fail -u "anonymous:anonymous" "ftp://$target/"
 	then
-		echo -e "NMAP_ANONYMOUS_FTP=YES\nTEST_ANONYMOUS_FTP=YES" > "$workdir/$service_name/auth_ftp.txt"
+		echo -e "NMAP_ANONYMOUS_FTP=YES\nTEST_ANONYMOUS_FTP=YES" > "$WORKDIR/$service_name/auth_ftp.txt"
         	return 0
 	else
-		echo -e "NMAP_ANONYMOUS_FTP=YES\nTEST_ANONYMOUS_FTP=FAIL" > "$workdir/$service_name/auth_ftp.txt"
+		echo -e "NMAP_ANONYMOUS_FTP=YES\nTEST_ANONYMOUS_FTP=FAIL" > "$WORKDIR/$service_name/auth_ftp.txt"
                 return 1
 	fi
 }
 
-nmap_ftp 
+target_arg="$1"
+port_arg="$2"
+service_name_arg="$3"
+
+nmap_ftp "$target_arg" "$port_arg" "$service_name_arg"
 
 
 
