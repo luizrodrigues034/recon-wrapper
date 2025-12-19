@@ -1,9 +1,9 @@
-target=$1
-port=$2
-service_name=$3
-workdir=workspaces/"$1"/"$service_name"
+workdir=workspaces/"$1"/"$3"
 
 banner_grabling(){
+	local target="$1"
+	local port="$2"
+	local service_name_arg="$3"
         echo "[*] Coletando banner"
         local banner=$(timeout 5 nc -vn "$target" "$port" 2>/dev/null || \
         echo "QUIT" | timeout 10 openssl s_client -connect "$target:$port" -starttls ftp -quiet 2>/dev/null)
@@ -15,9 +15,14 @@ banner_grabling(){
         else
                 echo "[*] Banner encontrado"
                 echo "[*] Salvando Banner"
-                echo "$banner" > "$workdir/banner.txt"
+                echo "$workdir/banner.txt"
+		echo "$banner" > "$workdir/banner.txt"
                 return 0
         fi
 }
 
-banner_grabling
+target_arg=$1
+port_arg=$2
+service_name_arg=$3
+
+banner_grabling "$target_arg" "$port_arg" "$service_name_arg" 
