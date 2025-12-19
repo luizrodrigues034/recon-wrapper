@@ -3,19 +3,21 @@
 set -euo pipefail
 
 
+
 default_scan(){
 
         mkdir -p ./workspaces/$1/init_scan
 
-	workdir="./workspaces/$1/init_scan"
-	nmap -sS "$1" -oX "$workdir/default_scan.xml" >/dev/null && \
-xmlstarlet sel -t -m "//port[state/@state='open']" -v "@portid" -o "=" -v "service/@name" -n "$workdir/default_scan.xml" > "$workdir/open_ports.txt" 
+	workdir="./workspaces/$1"
+	nmap -sS "$1" -oX "$workdir/init_scan/default_scan.xml" >/dev/null && \
+xmlstarlet sel -t -m "//port[state/@state='open']" -v "@portid" -o "=" -v "service/@name" -n "$workdir/init_scan/default_scan.xml" > \
+  "$workdir/init_scan/open_ports.txt" 
 	return 0
 }
 
 scan_by_service(){
 	echo "Dentro Metodo"
-	for line in  $(cat "$workdir/open_ports.txt")
+	for line in  $(cat "$workdir/init_scan/open_ports.txt")
         do
 		
 		port=$(echo "$line" | cut -d"=" -f1)
@@ -23,7 +25,7 @@ scan_by_service(){
 		echo "Trabalhando com o host: $target na porta $port hospendando o servico $service_name"
 		case "$service_name" in
 			*ftp*)
-				ftp_enum "$target" "$port"
+				ftp_enum "$target" "$port" "$service_name"
 		esac
 	done
         return 0
@@ -33,7 +35,10 @@ ftp_enum(){
 	if [ -f modules/ftp.sh ]
 	then
 		echo Ok
-		./modules/ftp.sh $1 $2 
+		mkdir -p "$workdir/$3/"
+		./lib/network.sh $1 $2 $3 &
+		./modules/ftp.sh $1 $2 $3 &
+		wait
 	fi
 }
 
