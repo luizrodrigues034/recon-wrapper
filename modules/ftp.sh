@@ -25,8 +25,7 @@ nmap_ftp(){
 
 	if grep -q "Anonymous FTP login allowed" "$xml_file"
 	then
-		recursive_extract
-		echo "[*]Metodo de listagem de diretorios caso nao for possivel"
+		recursive_extract || echo "[!] Nmap detectou Anonymous, mas a validação falhou."
 		return 0
 	fi
 	echo "[*] Login Anonimo nao e permitido"
@@ -37,9 +36,15 @@ recursive_extract(){
         wget -m -nH --no-parent -P "$workdir/ftp_service/ftp_loot/" "ftp://$target/" 2>/dev/null
 	if [ $? -eq 0 ]
 	then
-		echo "[*] Ftp loot disponivel em $$workdir/ftp_service/ftp_loot"
-	else 
-		echo "[*] Diretorio Vazio ou falhou"
+		echo "[*]Ftp loot disponivel em $workdir/ftp_service/ftp_loot"
+		return 0
+	elif curl -s --fail -u "anonymous:anonymous" "ftp://$target/"
+	then
+		echo -e "NMAP_ANONYMOUS_FTP=YES\nTEST_ANONYMOUS_FTP=YES" > "$workdir/ftp_service/auth_ftp.txt"
+        	return 0
+	else
+		echo -e "NMAP_ANONYMOUS_FTP=YES\nTEST_ANONYMOUS_FTP=FAIL" > "$workdir/ftp_service/auth_ftp.txt"
+                return 1
 	fi
 }
 
