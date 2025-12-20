@@ -24,6 +24,10 @@ scan_by_service(){
 		case "$service_name" in
 			*ftp*)
 				ftp_enum "$target" "$port" "$service_name"
+				;;
+			*ssh*)
+				ssh_enum "$target" "$port" "$service_name"	
+				;;
 		esac
 	done
         return 0
@@ -33,14 +37,31 @@ ftp_enum(){
 	local target="$1"
 	local port="$2"
 	local service_name="$3"
-
+	
 	if [ -f modules/ftp.sh ]
 	then
-		echo Ok
-		mkdir -p "$WORKDIR/$3/"
+		echo "[*]Iniciando enumeração FTP"
+		mkdir -p "$WORKDIR/$service_name/"
 		./lib/network.sh "$target" "$port" "$service_name" &
 		./modules/ftp.sh "$target" "$port" "$service_name" &
 		wait
+		echo "[*]Enumeração do FTP finalizada"
+		return 0
+	fi
+}
+
+ssh_enum(){
+	echo Teste
+	local target="$1"
+        local port="$2"
+        local service_name="$3"
+	if [ -f modules/ssh.sh ]
+	then
+                echo "[*]Iniciando enumeração SSH"
+                mkdir -p "$WORKDIR/$service_name/"
+                ./lib/network.sh "$target" "$port" "$service_name"
+		./modules/ssh.sh "$target" "$port" "$service_name"
+		return 0
 	fi
 }
 
