@@ -42,9 +42,9 @@ ftp_enum(){
 	then
 		echo "[*]Iniciando enumeração FTP"
 		mkdir -p "$WORKDIR/$service_name/"
-		./lib/network.sh "$target" "$port" "$service_name" &
-		./modules/ftp.sh "$target" "$port" "$service_name" &
-		wait
+		./lib/network.sh "$target" "$port" "$service_name"
+		./modules/ftp.sh "$target" "$port" "$service_name"
+
 		echo "[*]Enumeração do FTP finalizada"
 		return 0
 	fi

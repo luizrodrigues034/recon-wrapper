@@ -1,13 +1,10 @@
 #!/bin/env bash
 WORKDIR=workspaces/$1
 
-nmap_ftp(){
-	local target="$1"
-	local port="$2"
-	local service_name="$3"
+scan_anonymous_login(){
+	local service_name="$1"
 
-	nmap -sV -p "$port" -sC -A "$target" -oX "$WORKDIR/$service_name/nmap_ftp.xml"> /dev/null
-	local xml_file="$WORKDIR/$service_name/nmap_ftp.xml"
+	local xml_file="$WORKDIR/$service_name/nmap_$service_name.xml"
 
 	if grep -q "Anonymous FTP login allowed" "$xml_file"
 	then
@@ -42,7 +39,4 @@ target_arg="$1"
 port_arg="$2"
 service_name_arg="$3"
 
-nmap_ftp "$target_arg" "$port_arg" "$service_name_arg"
-
-
-
+scan_anonymous_login "$service_name_arg"
