@@ -20,7 +20,7 @@ recursive_extract(){
         local port="$2"
         local service_name="$3"
 
-        wget -m -nH --no-parent -P "$WORKDIR/$service_name/ftp_loot/" "ftp://$target/" 2>/dev/null
+        wget -m -nH --no-parent -P "$WORKDIR/$service_name/ftp_loot/" "ftp:anonymous:anonymous/${target}/" 2>/dev/null
 	if [ $? -eq 0 ]
 	then
 		echo "[*]Ftp loot disponivel em $WORKDIR/$service_name/ftp_loot"
