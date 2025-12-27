@@ -28,6 +28,8 @@ scan_by_service(){
 			*ssh*)
 				ssh_enum "$target" "$port" "$service_name"	
 				;;
+			*http*)
+				http_enum "$target" "$port" "$service_name"
 		esac
 	done
         return 0
@@ -37,7 +39,7 @@ ftp_enum(){
 	local target="$1"
 	local port="$2"
 	local service_name="$3"
-	
+
 	if [ -f modules/ftp.sh ]
 	then
 		echo "[*]Iniciando enumeração FTP"
@@ -61,6 +63,20 @@ ssh_enum(){
                 mkdir -p "$WORKDIR/$service_name/"
                 ./lib/network.sh "$target" "$port" "$service_name"
 		./modules/ssh.sh "$target" "$port" "$service_name"
+		return 0
+	fi
+}
+
+http_enum(){
+	echo HTTP
+        local target="$1"
+        local port="$2"
+        local service_name="$3"
+	if [ -f modules/http.sh ]
+	then
+		echo "[*] Iniciando enumeração HTTP"
+		mkdir -p "$WORKDIR/$service_name/"
+		./modules/http.sh "$target" "$port" "$service_name"
 		return 0
 	fi
 }
