@@ -1,8 +1,8 @@
 # Recon Wrapper
 
-## 🚀 Status: Em Desenvolvimento
+## 🚀 Status: Em Desenvolvimento / Em Uso
 
-Recon Wrapper é um **framework de reconhecimento automatizado de hosts** que simplifica e automatiza o processo de enumeração de serviços em redes. Ele foi projetado para executar scans iniciais em um host alvo e, posteriormente, executar técnicas específicas de enumeração conforme o tipo de serviço identificado em cada porta aberta.
+Recon Wrapper é um framework modular de reconhecimento automatizado de hosts que simplifica e automatiza a enumeração de serviços em redes. O projeto está em desenvolvimento ativo e já inclui módulos para FTP, HTTP e SSH, além de bibliotecas auxiliares em `lib/`.
 
 ---
 
@@ -36,8 +36,11 @@ Criar um wrapper automatizado que:
 recon-wrapper/
 ├── main.sh              # Script principal - orquestra o fluxo
 ├── modules/             # Diretório contendo módulos de enumeração
-│   ├── ftp.sh          # Módulo de enumeração FTP
-│   └── ...             # Outros módulos (em desenvolvimento)
+│   ├── ftp.sh           # Módulo de enumeração FTP (banner grabbing)
+│   ├── http.sh          # Módulo de enumeração HTTP
+│   └── ssh.sh           # Módulo de enumeração SSH
+├── lib/                 # Scripts auxiliares (ex: network helpers)
+│   └── network.sh
 ├── workspaces/         # Diretório de saída (criado automaticamente)
 │   └── {host}/
 │       ├── init_scan/
@@ -72,8 +75,8 @@ recon-wrapper/
 ┌─────────────────────────────────────┐
 │   Enumeração por Serviço            │
 │   • FTP → ftp.sh                    │
-│   • SSH → ssh.sh (futuro)           │
-│   • HTTP → http.sh (futuro)         │
+│   • SSH → ssh.sh                    │
+│   • HTTP → http.sh                  │
 │   • ...                             │
 └────────────────┬────────────────────┘
                  │
@@ -96,9 +99,7 @@ recon-wrapper/
   - Conexão direta via Netcat
   - Conexão segura via OpenSSL STARTTLS
 
-### Módulos Futuros
-- `ssh.sh` - Enumeração SSH (versão, autenticação)
-- `http.sh` - Enumeração HTTP/HTTPS (tecnologias, cabeçalhos)
+### Módulos Adicionais (planejados)
 - `smb.sh` - Enumeração SMB (shares, usuários)
 - `dns.sh` - Enumeração DNS (zonas, registros)
 - `ldap.sh` - Enumeração LDAP (diretórios, usuários)
@@ -233,6 +234,12 @@ esac
 - [x] Módulo FTP (banner grabbing)
 - [ ] Módulo SSH
 - [ ] Módulo HTTP/HTTPS
+ - [x] Estrutura base do framework
+ - [x] Scan Nmap automatizado
+ - [x] Parser de portas abertas
+ - [x] Módulo FTP (banner grabbing)
+ - [x] Módulo SSH
+ - [x] Módulo HTTP/HTTPS
 - [ ] Módulo SMB
 - [ ] Módulo DNS
 - [ ] Tratamento de erros aprimorado
@@ -273,4 +280,4 @@ Para dúvidas ou sugestões sobre o projeto, entre em contato.
 
 ---
 
-**Última atualização**: Dezembro de 2025
+**Última atualização**: 28 de Dezembro de 2025
